@@ -21,6 +21,7 @@ def getProducts(fileSrc):
 		if settings.PROGRESS_BAR == True:
 			util.updateProgress(float(idx) / float(len(lines)))
 		lineList = line.split(", ")
+		lineList[1] = float(lineList[1])
 		products.append(lineList);
 	return products
 
