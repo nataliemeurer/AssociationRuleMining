@@ -28,12 +28,12 @@ def getProducts(fileSrc):
 def getTransactions(fileSrc, products):
 	# main variables to be returned
 	transactions = []
-	transactionsObj = {}
 	dataFile = codecs.open(fileSrc, 'rb', 'utf-8') 	# specify utf-8 encoding
 	print "Loading Transactions..."
 	lines = dataFile.readlines() 					# read all lines
 	if settings.PROGRESS_BAR == True:
 		util.updateProgress(0)					# create a progress bar
+
 	# test every line and extract its relevant information
 	for idx, line in enumerate(lines):				# test each line
 		if settings.PROGRESS_BAR == True:
@@ -41,13 +41,13 @@ def getTransactions(fileSrc, products):
 		lineList = line.split(", ")
 		# Remove first item in the list
 		lineList.pop(0)
+		lineSet = set()
 		for idx2, item in enumerate(lineList):
-			if item == "0":
-				lineList[idx2] = 0
-			else:
-				lineList[idx2] = 1
+			if item != "0":
+				# Add the index to our list to indicate that the product has been bought
+				lineSet.add(idx2)
 		# append our array to our transactions
-		transactions.append(lineList);
+		transactions.append(lineSet);
 	if settings.PROGRESS_BAR == True:
 		util.updateProgress(1)
 		print "\n"

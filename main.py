@@ -5,8 +5,11 @@ sys.path.insert(0, 'src')
 
 import fileProcessor as fp
 import settings as ENV
+import associationRuleMiner as ARM
 
 products = fp.getProducts(ENV.PRODUCT_NAMES_SRC)
 transactions =  fp.getTransactions(ENV.ITEM_QUANTITY_SRC, products)
-for idx, item in enumerate(products):
-	print item[0] + ": " + str(transactions[5][idx])
+
+# print transactions
+miner = ARM.AssociationRuleMiner(products, transactions)
+miner.generateRules()
