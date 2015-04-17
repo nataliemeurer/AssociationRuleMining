@@ -7,4 +7,6 @@ import fileProcessor as fp
 import settings as ENV
 
 products = fp.getProducts(ENV.PRODUCT_NAMES_SRC)
-print products
+transactions =  fp.getTransactions(ENV.ITEM_QUANTITY_SRC, products)
+for idx, item in enumerate(products):
+	print item[0] + ": " + str(transactions[5][idx])

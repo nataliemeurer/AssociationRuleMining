@@ -6,20 +6,12 @@ PROGRESS_BAR = True 							# BOOLEAN: set whether a progress bar is used to show
 
 # DATA SETTINGS
 PRODUCT_NAMES_SRC = './data/products'				# STRING: The path to the data file
-ITEM_QUANTITY_SRC = './small_basket.dat'
+ITEM_QUANTITY_SRC = './data/small_basket.dat'
 
 
-# PREPROCESSOR SETTINGS
-FILL_WITH_CLASS_MODE = True 					# BOOLEAN: Determines whether the program fills missing values with the class mode or the overall mode
-CLASSIFIER_NAME = "class" 						# STRING: Name of presumed classifier
-REMOVE_OUTLIERS = True							# BOOLEAN: Determines whether any outliers will be removed
-REMOVE_ALL_OUTLIERS = True  					# BOOLEAN: If set to true, removes outliers from all continuous variables
-REMOVED_OUTLIERS = ['age']						# LIST(strings): If remove all outliers, set to false, the list of attributes that will be scanned for outliers
-OUTLIER_ZSCORE_THRESHOLD = [-2.5, 2.5]			# LIST(float): Range in which the z-score must fall for it to not be considered an outlier
-NORMALIZATION_METHOD = "min-max"				# STRING: normalization method--serves as default in the normalize attribute function. Possible values: "z-score", "min-max"
-NORMALIZED_MIN = 0								# INT: minimum value used for min-max normalization
-NORMALIZED_MAX = 1  							# INT: maximum value used for min-max normalization
-REMOVED_ATTRS = ["fnlwgt:", "education-num:"]	# LIST(strings): name of the attributes to be removed
+# ASSOCIATION CONSTRUCTION SETTINGS
+MIN_SUPPORT = .5
+MIN_CONFIDENCE = .5
 
 
 # CLUSTERING SETTINGS
