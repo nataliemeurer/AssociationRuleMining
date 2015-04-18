@@ -24,6 +24,7 @@ class AssociationRuleMiner:
 			print ""
 		rules = self.buildRules(itemSets)
 		print rules
+		print str(len(rules)) + " rules were generated."
 
 
 	def generateFrequentItemsets(self):
@@ -169,7 +170,7 @@ class AssociationRuleMiner:
 				for combo in combos:
 					comboSet = set(combo)
 					# add the rule and its result to our potential rules
-					potentialRules.append([comboSet, comboSet.difference(ruleSet)])
+					potentialRules.append([comboSet, ruleSet.difference(comboSet)])
 				# decrement our iterator
 				iter -= 1
 			# for every potential rule

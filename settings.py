@@ -10,7 +10,7 @@ ITEM_QUANTITY_SRC = './data/small_basket.dat'
 
 
 # ASSOCIATION CONSTRUCTION SETTINGS
-MIN_SUPPORT = .4
-MIN_CONFIDENCE = .5
+MIN_SUPPORT = .35
+MIN_CONFIDENCE = .2
 A_PRIORI_METHOD = "generate_all"				# STRING: "generate_all" or "use_tree"
 
