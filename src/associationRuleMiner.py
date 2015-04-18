@@ -23,8 +23,8 @@ class AssociationRuleMiner:
 				print self.products[item][0] + " "
 			print ""
 		rules = self.buildRules(itemSets)
-		print rules
-		print str(len(rules)) + " rules were generated."
+		self.displayRules(rules)
+		return rules
 
 
 	def generateFrequentItemsets(self):
@@ -204,7 +204,26 @@ class AssociationRuleMiner:
 						badRules.append(rule)
 		return rules
 
-
+	# displays the rules
+	def displayRules(self, rules):
+		print str(len(rules)) + " rules were generated:\n"
+		for rule in rules:
+			ruleStr = ""
+			ruleList = [list(rule[0]), list(rule[1])]
+			ruleList[0].sort()
+			ruleList[1].sort()
+			for idx, item in enumerate(ruleList[0]):
+				ruleStr += self.products[item][0]
+				if idx != (len(ruleList[0]) - 1):
+					ruleStr += ", "
+			ruleStr += " ---> "
+			for idx, item in enumerate(ruleList[1]):
+				ruleStr += self.products[item][0]
+				if idx != (len(ruleList[1]) - 1):
+					ruleStr += ", "
+			ruleStr += "\n"
+			print ruleStr
+				
 def calculateSupport(supportCount, totalEntries):
 	return float(supportCount) / float(totalEntries)
 
