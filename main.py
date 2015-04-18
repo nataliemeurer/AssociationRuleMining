@@ -13,5 +13,5 @@ transEntries = transactions[0]
 reverseItemLookup = transactions[1]
 
 # print transactions
-miner = ARM.AssociationRuleMiner(products, transEntries)
+miner = ARM.AssociationRuleMiner(products, transEntries, reverseItemLookup)
 miner.generateRules()
