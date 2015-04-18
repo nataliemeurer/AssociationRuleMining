@@ -12,9 +12,12 @@ class AssociationRuleMiner:
 		self.reverseLookup = reverseLookup
 		self.rules = []
 
-	# 
+	# main ARM function.  Calls functions to calculate frequent item sets and build rules
 	def generateRules(self):
+		print "Calculating Frequent Item Sets:"
+		# calculate item sets
 		itemSets = self.generateFrequentItemsets()
+		# display our item sets
 		print "\nFrequent item sets:"
 		for idx, mySet in enumerate(itemSets):
 			print "Set " + str(idx + 1) + ":"
@@ -23,7 +26,11 @@ class AssociationRuleMiner:
 			for item in listSet:
 				print self.products[item][0] + " "
 			print ""
+
+		print "Building Rules:\n"
+		# build rules based on our item sets
 		rules = self.buildRules(itemSets)
+		# display and return our generated rules
 		self.displayRules(rules)
 		return rules
 
@@ -34,7 +41,7 @@ class AssociationRuleMiner:
 		freqItemSets = []
 		badEntries = []
 		goodBases = []
-		
+
 		# Create a set with each item
 		for idx, item in enumerate(self.products):
 			support = calculateSupport(len(self.reverseLookup[item[0]]), len(self.transactions))
@@ -46,15 +53,18 @@ class AssociationRuleMiner:
 
 		kVal = 2
 		while len(freqItemSets) != 0:
+			print "\n\nProcessing item sets of length " + str(kVal) + "\n"
+			util.updateProgress(0)
 			# set our finalItemSets in case we cannot calculate them all
 			finalItemSets = freqItemSets[:]
 			freqItemSets = []
 			# find all combinations possible
 			combinations = it.combinations(goodBases, kVal)
+			combinations = list(combinations)
 			# for every combination...
-			for combination in combinations:
-				print combination
-				# turn the combination into
+			for idx, combination in enumerate(combinations):
+				util.updateProgress(float(idx) / float(len(combinations)))
+				# turn the combination(tuple) into a set
 				comboSet = set(combination)
 				# set a bool to determine if it's bad
 				isBad = False
@@ -79,85 +89,21 @@ class AssociationRuleMiner:
 							superSet = self.reverseLookup[self.products[productId][0]].intersection(superSet)
 					# Calculate support for our combinations
 					support = calculateSupport(len(superSet), len(self.transactions))
-					print "SUPPORT IS " + str(support)
 					if support < ENV.MIN_SUPPORT:
 						# add it to our bad entries
 						badEntries.append(comboSet)
 					else:
 						# Count it as a frequent item set
 						freqItemSets.append(comboSet)
+			util.updateProgress(1)
 			kVal += 1
 		return finalItemSets
-
-
-
-
-
-		# kVal = 1
-		# while len(currentItemSets) != 0:
-		# 	# Determine which item sets are frequent within itemSets
-		# 	print "\nDetermining support for itemsets of length " + str(kVal)
-		# 	util.updateProgress(0)
-		# 	freqItemSets = []
-		# 	# for every item in our itemsets, C_k
-		# 	for idx, currentSet in enumerate(currentItemSets):
-		# 		util.updateProgress(float(idx) /float(len(currentItemSets)))
-		# 		# set count to zero
-		# 		count = 0
-		# 		for trans in self.transactions:
-		# 			# If our set is in the transaction
-		# 			if currentSet.issubset(trans):
-		# 				count += 1
-		# 		support = calculateSupport(count, len(self.transactions))
-		# 		listSet = list(item)
-		# 		listSet.sort()
-		# 		key = ""
-		# 		for num in listSet:
-		# 			key += str(num)
-		# 		supports[key] = support
-		# 		# check if it is within the range we're looking for
-		# 		if support > ENV.MIN_SUPPORT:
-		# 			freqItemSets.append(currentSet)
-
-		# 	util.updateProgress(1)
-		# 	# Recalculate our currentItemSets
-		# 	currentItemSets = []
-		# 	i = 0
-
-		# 	print "\nCombining frequent item sets for next stage"
-		# 	util.updateProgress(0)
-			
-		# 	while i < len(freqItemSets):
-		# 		util.updateProgress(float(i) / float(len(freqItemSets)))
-		# 		j = i + 1
-		# 		while j < len(freqItemSets):
-		# 			# self-join our two sets
-		# 			unionSet = freqItemSets[i].union(freqItemSets[j])
-		# 			if unionSet not in currentItemSets and len(unionSet) == kVal + 1:
-		# 				currentItemSets.append(unionSet)
-		# 			# increment j
-		# 			j += 1
-		# 		# increment i
-		# 		i += 1
-		# 	# prune our tree
-		# 	indicesToRemove = []
-		# 	for idx, currentSet in enumerate(currentItemSets):
-		# 		for iterObj in it.combinations(list(currentSet), kVal):
-		# 			if set(iterObj) not in freqItemSets:
-		# 				# Add the index to our list of indices to be removed
-		# 				indicesToRemove.insert(0, idx)
-		# 				# break and exit
-		# 				break
-		# 	for index in indicesToRemove:
-		# 		if len(currentItemSets) > 0:
-		# 			currentItemSets.pop(index)
-		# 	kVal += 1
-		# return freqItemSets
 
 	# Main Function to create rules from a list of frequent item sets
 	def buildRules(self, sets):
 		# For each set...
 		rules = []
+		print "Extracting Rules from Frequent Sets:\n"
 		for ruleSet in sets:
 			potentialRules = []			# store all potential rules in the form [set(conditions), set(result)]
 			badRules = []
@@ -172,8 +118,12 @@ class AssociationRuleMiner:
 					potentialRules.append([comboSet, ruleSet.difference(comboSet)])
 				# decrement our iterator
 				iter -= 1
+
+			
+			util.updateProgress(0)
 			# for every potential rule
-			for rule in potentialRules:
+			for idx, rule in enumerate(potentialRules):
+				util.updateProgress( float(idx) / float(len(potentialRules)))
 				# eliminate rules via apriori principle
 				low_confidence_via_apriori = False
 				for badRule in badRules:
@@ -202,6 +152,8 @@ class AssociationRuleMiner:
 						rules.append(rule)
 					else:
 						badRules.append(rule)
+			util.updateProgress(1)
+			print "\n"
 		return rules
 
 	# displays the rules
