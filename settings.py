@@ -6,8 +6,6 @@ PROGRESS_BAR = True 							# BOOLEAN: set whether a progress bar is used to show
 
 # DATA SETTINGS
 PRODUCT_NAMES_SRC = './data/products'				# STRING: The path to the data file
-ITEM_QUANTITY_SRC = './data/small_basket.dat'
-
 
 # ASSOCIATION CONSTRUCTION SETTINGS
 MIN_SUPPORT = .35

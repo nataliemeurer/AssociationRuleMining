@@ -12,6 +12,7 @@ class AssociationRuleMiner:
 		self.reverseLookup = reverseLookup
 		self.rules = []
 
+	# 
 	def generateRules(self):
 		itemSets = self.generateFrequentItemsets()
 		print "\nFrequent item sets:"
@@ -29,16 +30,14 @@ class AssociationRuleMiner:
 
 	def generateFrequentItemsets(self):
 		# start with a value of k = 1 and add everything to our item sets and prune (because it is a breadth first approach)
-		currentItemSets = []
 		finalItemSets = []
 		freqItemSets = []
 		badEntries = []
 		goodBases = []
-		supports = {}
+		
 		# Create a set with each item
 		for idx, item in enumerate(self.products):
 			support = calculateSupport(len(self.reverseLookup[item[0]]), len(self.transactions))
-			supports[str(idx)] = support
 			if support >= ENV.MIN_SUPPORT:
 				freqItemSets.append(set([idx]))
 				goodBases.append(idx)
@@ -155,7 +154,7 @@ class AssociationRuleMiner:
 		# 	kVal += 1
 		# return freqItemSets
 
-
+	# Main Function to create rules from a list of frequent item sets
 	def buildRules(self, sets):
 		# For each set...
 		rules = []
@@ -199,6 +198,7 @@ class AssociationRuleMiner:
 					confidence = calculateConfidence(totalCount, ruleSetCount)
 					# if it meets our threshold, add it to our list of rules
 					if confidence >= ENV.MIN_CONFIDENCE:
+						rule.append(confidence)
 						rules.append(rule)
 					else:
 						badRules.append(rule)
@@ -221,7 +221,7 @@ class AssociationRuleMiner:
 				ruleStr += self.products[item][0]
 				if idx != (len(ruleList[1]) - 1):
 					ruleStr += ", "
-			ruleStr += "\n"
+			ruleStr += "\nConfidence: " + str(rule[2]) + "\n"
 			print ruleStr
 				
 def calculateSupport(supportCount, totalEntries):
