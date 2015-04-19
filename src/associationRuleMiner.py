@@ -113,12 +113,17 @@ class AssociationRuleMiner:
 				for idx, currentSet in enumerate(currentItemSets):
 					util.updateProgress(float(idx) /float(len(currentItemSets)))
 					# set count to zero
-					count = 0
-					for trans in self.transactions:
-						# If our set is in the transaction
-						if currentSet.issubset(trans):
-							count += 1
-					support = calculateSupport(count, len(self.transactions))
+					superSet = None
+					for productId in currentSet:
+						# if we haven't defined our superset yet, we set it to the entire space of reverse lookup
+						if superSet == None:
+							superSet = self.reverseLookup[self.products[productId][0]]
+						# Otherwise, we find the intersection between the two sets
+						else:
+							superSet = self.reverseLookup[self.products[productId][0]].intersection(superSet)
+					# Calculate support for our combinations
+					support = calculateSupport(len(superSet), len(self.transactions))
+
 					listSet = list(item)
 					listSet.sort()
 					key = ""
@@ -134,7 +139,7 @@ class AssociationRuleMiner:
 				currentItemSets = []
 				i = 0
 
-				print "\nCombining frequent item sets for next stage"
+				print "\nCombining frequent item sets for next iteration"
 				util.updateProgress(0)
 				
 				while i < len(freqItemSets):
@@ -149,6 +154,8 @@ class AssociationRuleMiner:
 						j += 1
 					# increment i
 					i += 1
+				util.updateProgress(1)
+				print "\n"
 				# prune our tree
 				indicesToRemove = []
 				for idx, currentSet in enumerate(currentItemSets):
