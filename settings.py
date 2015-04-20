@@ -10,7 +10,7 @@ ITEM_QUANTITY_SRC = './data/small_basket.dat'	# STRING: The path to the data fil
 
 
 # ASSOCIATION CONSTRUCTION SETTINGS
-MIN_SUPPORT = .3
+MIN_SUPPORT = .15
 MIN_CONFIDENCE = .5
 APRIORI_METHOD = "partial"							# STRING: Either "full" or "partial".  Both yield the same results, although partial is considerably faster.  Full is a more set-based/iterable.combination implementation that does not conform perfectly to Apriori principles
 

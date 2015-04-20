@@ -44,9 +44,10 @@ def getTransactions(fileSrc, products):
 		lineList = line.split(", ")
 		# Remove first item in the list
 		lineList.pop(0)
+
 		lineSet = set()
 		for idx2, item in enumerate(lineList):
-			if item != "0":
+			if float(item) != 0:
 				# Add the index to our list to indicate that the product has been bought
 				reverseItemLookup[products[idx2][0]].add(idx)
 				lineSet.add(idx2)
