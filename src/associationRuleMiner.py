@@ -53,123 +53,74 @@ class AssociationRuleMiner:
 				currentItemSets.append(set([idx]))
 			else:
 				badEntries.append(set([idx]))
-		if ENV.APRIORI_METHOD == "full":
-			kVal = 2
-			while len(freqItemSets) != 0:
-				print "\n\nProcessing item sets of length " + str(kVal) + "\n"
-				util.updateProgress(0)
-				# set our finalItemSets in case we cannot calculate them all
-				finalItemSets = freqItemSets[:]
-				freqItemSets = []
-				# find all combinations possible
-				combinations = it.combinations(goodBases, kVal)
-				combinations = list(combinations)
-				# for every combination...
-				for idx, combination in enumerate(combinations):
-					util.updateProgress(float(idx) / float(len(combinations)))
-					# turn the combination(tuple) into a set
-					comboSet = set(combination)
-					# set a bool to determine if it's bad
-					isBad = False
-					# for each potential set of the given k value, test if it contains any eliminated entries
-					for badSet in badEntries:
-						# if the badSet is a part of the comboSet...
-						if badSet.issubset(comboSet):
-							# Add our comboSet to the list of bad entries
-							# badEntries.append(comboSet)
-							isBad = True
-							break
-					# if it should be included
-					if isBad == False:
-						# test support
-						superSet = None
-						for productId in combination:
-							# if we haven't defined our superset yet, we set it to the entire space of reverse lookup
-							if superSet == None:
-								superSet = self.reverseLookup[self.products[productId][0]]
-							# Otherwise, we find the intersection between the two sets
-							else:
-								superSet = self.reverseLookup[self.products[productId][0]].intersection(superSet)
-						# Calculate support for our combinations
-						support = calculateSupport(len(superSet), len(self.transactions))
-						if support < ENV.MIN_SUPPORT:
-							# add it to our bad entries
-							badEntries.append(comboSet)
-						else:
-							# Count it as a frequent item set
-							freqItemSets.append(comboSet)
-				util.updateProgress(1)
-				kVal += 1
-			return finalItemSets
+		
+		kVal = 1
+		while len(currentItemSets) != 0:
+			# Determine which item sets are frequent within itemSets
+			print "\nDetermining support for itemsets of length " + str(kVal)
+			util.updateProgress(0)
+			freqItemSets = []
+			# for every item in our itemsets, C_k
+			for idx, currentSet in enumerate(currentItemSets):
+				util.updateProgress(float(idx) /float(len(currentItemSets)))
+				# set count to zero
+				superSet = None
+				for productId in currentSet:
+					# if we haven't defined our superset yet, we set it to the entire space of reverse lookup
+					if superSet == None:
+						superSet = self.reverseLookup[self.products[productId][0]]
+					# Otherwise, we find the intersection between the two sets
+					else:
+						superSet = self.reverseLookup[self.products[productId][0]].intersection(superSet)
+				# Calculate support for our combinations
+				support = calculateSupport(len(superSet), len(self.transactions))
 
-		else:
-			kVal = 1
-			while len(currentItemSets) != 0:
-				# Determine which item sets are frequent within itemSets
-				print "\nDetermining support for itemsets of length " + str(kVal)
-				util.updateProgress(0)
-				freqItemSets = []
-				# for every item in our itemsets, C_k
-				for idx, currentSet in enumerate(currentItemSets):
-					util.updateProgress(float(idx) /float(len(currentItemSets)))
-					# set count to zero
-					superSet = None
-					for productId in currentSet:
-						# if we haven't defined our superset yet, we set it to the entire space of reverse lookup
-						if superSet == None:
-							superSet = self.reverseLookup[self.products[productId][0]]
-						# Otherwise, we find the intersection between the two sets
-						else:
-							superSet = self.reverseLookup[self.products[productId][0]].intersection(superSet)
-					# Calculate support for our combinations
-					support = calculateSupport(len(superSet), len(self.transactions))
+				listSet = list(item)
+				listSet.sort()
+				key = ""
+				for num in listSet:
+					key += str(num) + " "
+				self.supports[key] = support
+				# check if it is within the range we're looking for
+				if support > ENV.MIN_SUPPORT:
+					freqItemSets.append(currentSet)
 
-					listSet = list(item)
-					listSet.sort()
-					key = ""
-					for num in listSet:
-						key += str(num) + " "
-					self.supports[key] = support
-					# check if it is within the range we're looking for
-					if support > ENV.MIN_SUPPORT:
-						freqItemSets.append(currentSet)
+			util.updateProgress(1)
+			# Recalculate our currentItemSets
+			currentItemSets = []
+			i = 0
 
-				util.updateProgress(1)
-				# Recalculate our currentItemSets
-				currentItemSets = []
-				i = 0
-
-				print "\nCombining frequent item sets for next iteration"
-				util.updateProgress(0)
-				
-				while i < len(freqItemSets):
-					util.updateProgress(float(i) / float(len(freqItemSets)))
-					j = i + 1
-					while j < len(freqItemSets):
-						# self-join our two sets
-						unionSet = freqItemSets[i].union(freqItemSets[j])
-						if unionSet not in currentItemSets and len(unionSet) == kVal + 1:
-							currentItemSets.append(unionSet)
-						# increment j
-						j += 1
-					# increment i
-					i += 1
-				util.updateProgress(1)
-				print "\n"
-				# prune our tree
-				indicesToRemove = []
-				for idx, currentSet in enumerate(currentItemSets):
-					for iterObj in it.combinations(list(currentSet), kVal):
-						if set(iterObj) not in freqItemSets:
-							# Add the index to our list of indices to be removed
-							indicesToRemove.insert(0, idx)
-							# break and exit
-							break
-				for index in indicesToRemove:
-					if len(currentItemSets) > 0:
-						currentItemSets.pop(index)
-				kVal += 1
-			return freqItemSets
+			print "\nCombining frequent item sets for next iteration"
+			util.updateProgress(0)
+			
+			while i < len(freqItemSets):
+				util.updateProgress(float(i) / float(len(freqItemSets)))
+				j = i + 1
+				while j < len(freqItemSets):
+					# self-join our two sets
+					unionSet = freqItemSets[i].union(freqItemSets[j])
+					if unionSet not in currentItemSets and len(unionSet) == kVal + 1:
+						currentItemSets.append(unionSet)
+					# increment j
+					j += 1
+				# increment i
+				i += 1
+			util.updateProgress(1)
+			print "\n"
+			# prune our tree
+			indicesToRemove = []
+			for idx, currentSet in enumerate(currentItemSets):
+				for iterObj in it.combinations(list(currentSet), kVal):
+					if set(iterObj) not in freqItemSets:
+						# Add the index to our list of indices to be removed
+						indicesToRemove.insert(0, idx)
+						# break and exit
+						break
+			for index in indicesToRemove:
+				if len(currentItemSets) > 0:
+					currentItemSets.pop(index)
+			kVal += 1
+		return freqItemSets
 
 	# Main Function to create rules from a list of frequent item sets
 	def buildRules(self, sets):

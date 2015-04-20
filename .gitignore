@@ -2,3 +2,4 @@
 venv/*
 activate/*
 *.pyc
+*.pdf

@@ -8,24 +8,19 @@ import settings as ENV
 import associationRuleMiner as ARM
 import datetime
 
-testRunData = [  
-[0.175, 1]
-]	# in the form of [min_Support, min_confidence]
-for test in testRunData:
-	ENV.MIN_SUPPORT = test[0]
-	ENV.MIN_CONFIDENCE = test[1]
-	print "Running test for min support of " + str(ENV.MIN_SUPPORT) + " and min confidence of " + str(ENV.MIN_CONFIDENCE)
-	startTime = datetime.datetime.now()
 
-	products = fp.getProducts(ENV.PRODUCT_NAMES_SRC)
-	transactions =  fp.getTransactions(ENV.ITEM_QUANTITY_SRC, products)
-	transEntries = transactions[0]
-	reverseItemLookup = transactions[1]
+print "Running mining algorithm for min support of " + str(ENV.MIN_SUPPORT) + " and min confidence of " + str(ENV.MIN_CONFIDENCE)
+startTime = datetime.datetime.now()
 
-	# print transactions
-	miner = ARM.AssociationRuleMiner(products, transEntries, reverseItemLookup)
-	miner.generateRules()
+products = fp.getProducts(ENV.PRODUCT_NAMES_SRC)
+transactions =  fp.getTransactions(ENV.ITEM_QUANTITY_SRC, products)
+transEntries = transactions[0]
+reverseItemLookup = transactions[1]
 
-	endTime = datetime.datetime.now()
-	timeSpent = endTime - startTime
-	print "PROGRAM COMPLETED IN " + str(timeSpent.seconds) + " SECONDS\n\n\n--------------------------\n\n\n"
+# print transactions
+miner = ARM.AssociationRuleMiner(products, transEntries, reverseItemLookup)
+miner.generateRules()
+
+endTime = datetime.datetime.now()
+timeSpent = endTime - startTime
+print "PROGRAM COMPLETED IN " + str(timeSpent.seconds) + " SECONDS\n\n\n--------------------------\n\n\n"
