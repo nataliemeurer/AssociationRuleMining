@@ -11,6 +11,7 @@ class AssociationRuleMiner:
 		self.transactions = transactions
 		self.reverseLookup = reverseLookup
 		self.rules = []
+		self.supports = {}
 
 	# main ARM function.  Calls functions to calculate frequent item sets and build rules
 	def generateRules(self):
@@ -42,7 +43,6 @@ class AssociationRuleMiner:
 		badEntries = []
 		goodBases = []
 		currentItemSets = []
-		supports = {}
 
 		# Create a set with each item
 		for idx, item in enumerate(self.products):
@@ -128,8 +128,8 @@ class AssociationRuleMiner:
 					listSet.sort()
 					key = ""
 					for num in listSet:
-						key += str(num)
-					supports[key] = support
+						key += str(num) + " "
+					self.supports[key] = support
 					# check if it is within the range we're looking for
 					if support > ENV.MIN_SUPPORT:
 						freqItemSets.append(currentSet)
@@ -203,8 +203,8 @@ class AssociationRuleMiner:
 						low_confidence_via_apriori = True
 				if low_confidence_via_apriori == False:
 					# test confidence level
-					superSet = None
 					totalCount = None
+					superSet = None
 					for productId in rule[0]:
 						# if we haven't defined our superset yet, we set it to the entire space of reverse lookup
 						if superSet == None:
@@ -213,14 +213,23 @@ class AssociationRuleMiner:
 						else:
 							superSet = self.reverseLookup[self.products[productId][0]].intersection(superSet)
 					ruleSetCount = len(superSet)
+					
 					for productId in rule[1]:
 						superSet = self.reverseLookup[self.products[productId][0]].intersection(superSet)
-					totalCount = len(superSet)
+					totalCount = float(len(superSet))
 					# get our confidence
 					confidence = calculateConfidence(totalCount, ruleSetCount)
+					
 					# if it meets our threshold, add it to our list of rules
 					if confidence >= ENV.MIN_CONFIDENCE:
 						rule.append(confidence)
+						
+						# calculate lift and add
+						antecedentSupp = calculateSupport(ruleSetCount, len(self.transactions))
+						resultSupp = calculateSupport(self.getIntersectionCount(rule[1]), len(self.transactions))
+						lift = calculateLift(float(ruleSetCount) / len(self.transactions), antecedentSupp, resultSupp)
+						rule.append(lift)
+
 						rules.append(rule)
 					else:
 						badRules.append(rule)
@@ -245,11 +254,28 @@ class AssociationRuleMiner:
 				ruleStr += self.products[item][0]
 				if idx != (len(ruleList[1]) - 1):
 					ruleStr += ", "
-			ruleStr += "\nConfidence: " + str(rule[2]) + "\n"
+			ruleStr += "\nConfidence: " + str(rule[2])
+			ruleStr += "\nLift: " + str(rule[3]) + "\n"
 			print ruleStr
+
+	def getIntersectionCount(self, countSet):
+		# calculate lift: get support of our antecedent and result and pass to the function
+		superSet = None
+		for productId in countSet:
+			# if we haven't defined our superset yet, we set it to the entire space of reverse lookup
+			if superSet == None:
+				superSet = self.reverseLookup[self.products[productId][0]]
+			# Otherwise, we find the intersection between the two sets
+			else:
+				superSet = self.reverseLookup[self.products[productId][0]].intersection(superSet)
+		return float(len(superSet))
+
 				
 def calculateSupport(supportCount, totalEntries):
 	return float(supportCount) / float(totalEntries)
 
 def calculateConfidence(totalCount, ruleSetCount):
 	return float(totalCount) / float(ruleSetCount)
+
+def calculateLift(aUnionb, probOfA, probOfB):
+	return float(aUnionb) / (float(probOfA) * float(probOfB))
