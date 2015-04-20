@@ -227,7 +227,7 @@ class AssociationRuleMiner:
 						# calculate lift and add
 						antecedentSupp = calculateSupport(ruleSetCount, len(self.transactions))
 						resultSupp = calculateSupport(self.getIntersectionCount(rule[1]), len(self.transactions))
-						lift = calculateLift(float(ruleSetCount) / len(self.transactions), antecedentSupp, resultSupp)
+						lift = calculateLift(float(totalCount) / len(self.transactions), antecedentSupp, resultSupp)
 						rule.append(lift)
 
 						rules.append(rule)

@@ -8,7 +8,9 @@ import settings as ENV
 import associationRuleMiner as ARM
 import datetime
 
-testRunData = [  [.3, .5]]	# in the form of [min_Support, min_confidence]
+testRunData = [  
+[0.175, 1]
+]	# in the form of [min_Support, min_confidence]
 for test in testRunData:
 	ENV.MIN_SUPPORT = test[0]
 	ENV.MIN_CONFIDENCE = test[1]
